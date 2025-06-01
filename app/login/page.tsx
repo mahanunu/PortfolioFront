@@ -1,37 +1,36 @@
 'use client';
 
-import Login from '@/src/components/Login'; // Assurez-vous que le chemin est correct
+import Login from '@/src/components/Login';
 import { useAuth } from '@/src/context/AuthContext';
-import { useRouter } from 'next/navigation'; // Utilisation de next/navigation
+import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function LoginPage() {
-  const { isAuthenticated, login, setIsAuthenticated, setUser } = useAuth();
+  const { isAuthenticated, login, isLoading } = useAuth(); // Utiliser login du contexte, et isLoading
   const router = useRouter();
 
-  // Si l'utilisateur est déjà authentifié, rediriger vers la page d'accueil
   useEffect(() => {
-    if (isAuthenticated) {
+    // Ne pas rediriger si isLoading est true, attendre que l'état d'auth soit déterminé
+    if (!isLoading && isAuthenticated) {
       router.push('/');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isLoading, router]);
 
-  // Le composant Login attend setIsAuthenticated et setUser directement
-  // La fonction login du contexte peut être utilisée pour encapsuler la logique si nécessaire après l'appel API
-  // Pour l'instant, nous passons directement setIsAuthenticated et setUser comme attendu par Login.jsx
-  // et nous utiliserons la fonction login du contexte pour la sémantique et la mise à jour de l'utilisateur.
-
-  const handleLoginSuccess = (userData: { email: string }) => {
-    login(userData); // Met à jour l'état global via le contexte
-    // La redirection est maintenant gérée par Login.jsx ou par l'effet ci-dessus
+  const handleLoginSuccess = (userData: { email: string }, token: string) => {
+    login(userData, token); // Appeler la fonction login du contexte avec le token
+    // La redirection est maintenant gérée par Login.jsx après l'appel de cette fonction
+    // ou par le useEffect ci-dessus si l'état isAuthenticated change.
   };
+
+  // Si l'authentification est en cours de vérification, ou si déjà authentifié et en cours de redirection
+  if (isLoading || isAuthenticated) {
+    return <p>Chargement...</p>; // Ou un spinner/skeleton screen
+  }
 
   return (
     <div style={{ fontFamily: 'sans-serif', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f0f2f5' }}>
       <div style={{ backgroundColor: '#fff', padding: '2rem', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)', width: '100%', maxWidth: '400px' }}>
-        {/* Le composant Login prend setIsAuthenticated et setUser comme props */}
-        {/* Nous devons adapter cela pour qu'il utilise handleLoginSuccess ou modifier Login.jsx */}
-        <Login setIsAuthenticated={setIsAuthenticated} setUser={setUser} />
+        <Login onLoginSuccess={handleLoginSuccess} />
       </div>
     </div>
   );

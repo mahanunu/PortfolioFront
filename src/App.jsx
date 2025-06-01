@@ -2,6 +2,10 @@ import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-ro
 import Register from './components/Register';
 import Login from './components/Login';
 import { useState, useEffect } from 'react';
+import ProjectList from './components/ProjectList';
+import ProjectDetail from './components/ProjectDetail';
+import ContactForm from './components/ContactForm';
+import AdminDashboard from './components/AdminDashboard';
 
 console.log('App.jsx: Script loaded. Login component imported:', Login);
 
@@ -78,7 +82,19 @@ function App() {
             path="/" 
             element={
               isAuthenticated ? (
-                <h1>Welcome to the homepage!</h1>
+                <ProjectList />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            } 
+          />
+          <Route path="/project/:id" element={<ProjectDetail />} />
+          <Route path="/contact" element={<ContactForm />} />
+          <Route 
+            path="/admin" 
+            element={
+              isAuthenticated ? (
+                <AdminDashboard />
               ) : (
                 <Navigate to="/login" replace />
               )

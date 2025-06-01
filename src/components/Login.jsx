@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation'; // Remplacer react-router-dom
 
-// Props: setIsAuthenticated et setUser sont fournies par LoginPage qui utilise useAuth()
-function Login({ setIsAuthenticated, setUser }) {
+// Props: onLoginSuccess est fournie par LoginPage
+function Login({ onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -35,10 +35,8 @@ function Login({ setIsAuthenticated, setUser }) {
 
       if (response.ok) {
         if (data.token) {
-          localStorage.setItem('jwtToken', data.token); // Stocker le token JWT
-          setIsAuthenticated(true);
-          // Vous pourriez vouloir décoder le token pour obtenir des informations utilisateur ou faire un appel /api/me
-          setUser({ email: email }); // Mettre à jour l'utilisateur (simplifié)
+          // Appeler le callback fourni par LoginPage
+          onLoginSuccess({ email: email }, data.token);
           router.push('/');
         } else {
           setError('Token non reçu après la connexion.');
